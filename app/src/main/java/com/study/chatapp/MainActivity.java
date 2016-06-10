@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     //적어도 전송 버튼을 누르기전에는 메모리에 올라와 있어야 한다..
     //따라서 접속과 동시에 스트림을 뽑아놓자!!
     BufferedReader buffr;//서버로부터 전송되어온 메세지를 청취하기 위한 스트림!!
+    ClientThread clientThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,27 +49,20 @@ public class MainActivity extends AppCompatActivity {
 
             if(client.isConnected()){
                 edit_area.append("서버에 접속됨\n");
-                buffw = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-                buffr = new BufferedReader(new InputStreamReader(client.getInputStream()));
+
+                //더이상 현재의 액티비티에서 대화처리를 담당하지 말고, 모든 것을 쓰레드에게 맡기자!!
+                clientThread = new ClientThread(this, client);
+                clientThread.start();//청취시작!!
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    //메세지 보내기!!! ( 현재 실행중인 프로그램에서 데이터가 나가는 것이므로 = 출력이다)
-    public void send(){
-        String msg=edit_input.getText().toString();
-        try {
-            buffw.write(msg+"\n"); //반드시 반드시 줄바꿈 표시가 있어야 버퍼스트림의 문장의 끝임을 이해한다.
-            buffw.flush(); //퍼버처리된 출력스트림 계열은 버퍼를 싹!! 비워주자!!
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void btnClick(View view){
-        send();
+        String msg=edit_input.getText().toString();
+        clientThread.send(msg);
     }
 }
 
