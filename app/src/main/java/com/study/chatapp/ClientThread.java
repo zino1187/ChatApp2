@@ -25,8 +25,6 @@ public class ClientThread extends Thread{
     Socket client;
     BufferedReader buffr; //듣고
     BufferedWriter buffw;//말하고
-    Handler handler; // 개발자가 정의한 쓰레드는 절대 UI를 제어할 수 없다. 즉 메인쓰레드의 역할을 침범
-    //할 수 없다. 따라서 Handler를 통해 원하는 UI제어를 부탁하면 된다...
 
     public ClientThread(MainActivity activity, Socket client){
         this.mainActivity=activity;
@@ -38,14 +36,6 @@ public class ClientThread extends Thread{
             e.printStackTrace();
         }
 
-        handler = new Handler(){
-            public void handleMessage(Message message) {
-                //메인액티비티의 EditText에 메세지 출력!!
-                Bundle bundle=message.getData();
-                String msg=bundle.getString("msg");
-                mainActivity.edit_area.append(msg+"\n");
-            }
-        };
     }
 
     //메세지 보내기!!! ( 현재 실행중인 프로그램에서 데이터가 나가는 것이므로 = 출력이다)
@@ -73,7 +63,7 @@ public class ClientThread extends Thread{
             bundle.putString("msg", msg); //대화내용 탑재!!
             message.setData(bundle);
 
-            handler.sendMessage(message);
+            mainActivity.handler.sendMessage(message);
 
         } catch (IOException e) {
             e.printStackTrace();
